@@ -24,6 +24,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/contiv/netplugin/mgmtfn/k8splugin/cniapi"
+	"github.com/contiv/netplugin/mgmtfn/k8splugin/iotapi"
 	"github.com/contiv/netplugin/netmaster/intent"
 	"github.com/contiv/netplugin/netmaster/master"
 	"github.com/contiv/netplugin/netplugin/cluster"
@@ -42,6 +43,7 @@ type epSpec struct {
 // epAttr contains the assigned attributes of the created ep
 type epAttr struct {
 	IPAddress   string
+	MacAddress  string
 	PortName    string
 	Gateway     string
 	IPv6Address string
@@ -256,5 +258,59 @@ func deletePod(w http.ResponseWriter, r *http.Request, vars map[string]string) (
 	}
 	resp.Result = 0
 	resp.EndpointID = pInfo.InfraContainerID
+	return resp, nil
+}
+
+// addDevIot is the handler for iot devices additions
+func addIotDev(w http.ResponseWriter, r *http.Request, vars map[string]string) (interface{}, error) {
+
+	resp := iotapi.RspAddIotDev{}
+
+	logEvent("add iot device")
+
+	content, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Errorf("Failed to read request: %v", err)
+		return resp, err
+	}
+
+	IotInfo := iotapi.IOTDevAttr{}
+	if err := json.Unmarshal(content, &IotInfo); err != nil {
+		return resp, err
+	}
+
+	// if the ep already exists, treat as error for now.
+	netID := IotInfo.Network + "." + IotInfo.Tenant
+	ep, err := utils.GetEndpoint(netID + "-" + IotInfo.InfraIotDevID)
+
+	if err != nil {
+		resp.EndpointID = IotInfo.InfraIotDevID
+
+		resp.Attr = &iotapi.Attr{IPAddress: ep.IPAddress, PortName: ep.PortName,
+			MacAddess: ep.MacAddress, IPv6Address: ep.IPv6Address}
+
+		return resp, nil
+	}
+
+	// from r.Body, need tenant, networtk, epg(endpoit group), EndpointID, Name
+	epReq := epSpec{}
+	epReq.EndpointID = IotInfo.InfraIotDevID
+	epReq.Name = IotInfo.Name
+	epReq.Group = IotInfo.Group
+	epReq.Tenant = IotInfo.Tenant
+	epReq.Network = IotInfo.Network
+
+	NewEP, err := createEP(&epReq)
+	if err != nil {
+		log.Errorf("Error creating ep iot. Err: %v", err)
+		//setErrorResp(&resp, "Error creating EP Iot", err)
+		return resp, err
+	}
+
+	resp.EndpointID = IotInfo.InfraIotDevID
+
+	resp.Attr = &iotapi.Attr{IPAddress: NewEP.IPAddress, PortName: NewEP.PortName,
+		MacAddess: NewEP.MacAddress, IPv6Address: NewEP.IPv6Address}
+
 	return resp, nil
 }
