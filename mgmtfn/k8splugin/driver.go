@@ -24,7 +24,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/contiv/netplugin/mgmtfn/k8splugin/cniapi"
-	"github.com/contiv/netplugin/mgmtfn/k8splugin/iotapi"
 	"github.com/contiv/netplugin/netmaster/intent"
 	"github.com/contiv/netplugin/netmaster/master"
 	"github.com/contiv/netplugin/netplugin/cluster"
@@ -79,6 +78,34 @@ func epCleanUp(req *epSpec) error {
 	}
 
 	return masterErr
+}
+
+// getEP get a EP if then exist
+func getEP(tenant, network, epID string) (*epAttr, error) {
+	netID := network + "." + tenant
+
+	ep, err := utils.GetEndpoint(netID + "-" + epID)
+	if err != nil {
+		log.Errorf("## the EP not exist %s", err)
+		return nil, fmt.Errorf("the EP %s not exists", epID)
+	}
+
+	nw, err := utils.GetNetwork(netID)
+	if err != nil {
+		return nil, err
+	}
+
+	epResp := epAttr{}
+	epResp.PortName = ep.PortName
+	epResp.IPAddress = ep.IPAddress + "/" + strconv.Itoa(int(nw.SubnetLen))
+	epResp.Gateway = nw.Gateway
+
+	if ep.IPv6Address != "" {
+		epResp.IPv6Address = ep.IPv6Address + "/" + strconv.Itoa(int(nw.IPv6SubnetLen))
+		epResp.IPv6Gateway = nw.IPv6Gateway
+	}
+
+	return &epResp, nil
 }
 
 // createEP creates the specified EP in contiv
@@ -264,7 +291,7 @@ func deletePod(w http.ResponseWriter, r *http.Request, vars map[string]string) (
 // addDevIot is the handler for iot devices additions
 func addIotDev(w http.ResponseWriter, r *http.Request, vars map[string]string) (interface{}, error) {
 
-	resp := iotapi.RspAddIotDev{}
+	resp := cniapi.RspAddPod{}
 
 	logEvent("add iot device")
 
@@ -274,43 +301,39 @@ func addIotDev(w http.ResponseWriter, r *http.Request, vars map[string]string) (
 		return resp, err
 	}
 
-	IotInfo := iotapi.IOTDevAttr{}
+	IotInfo := cniapi.IOTDevAttr{}
 	if err := json.Unmarshal(content, &IotInfo); err != nil {
 		return resp, err
 	}
 
-	// if the ep already exists, treat as error for now.
-	netID := IotInfo.Network + "." + IotInfo.Tenant
-	ep, err := utils.GetEndpoint(netID + "-" + IotInfo.InfraIotDevID)
+	ep, err := getEP(IotInfo.Tenant, IotInfo.Network, IotInfo.InfraIotDevID)
 
 	if err != nil {
-		resp.EndpointID = IotInfo.InfraIotDevID
+		// from r.Body, need tenant, networtk, epg(endpoit group), EndpointID, Name
+		epReq := epSpec{}
+		epReq.EndpointID = IotInfo.InfraIotDevID
+		epReq.Name = IotInfo.Name
+		epReq.Group = IotInfo.Group
+		epReq.Tenant = IotInfo.Tenant
+		epReq.Network = IotInfo.Network
 
-		resp.Attr = &iotapi.Attr{IPAddress: ep.IPAddress, PortName: ep.PortName,
-			MacAddess: ep.MacAddress, IPv6Address: ep.IPv6Address}
+		newEP, err := createEP(&epReq)
+		if err != nil {
+			log.Errorf("Error creating ep iot. Err: %v", err)
+			//setErrorResp(&resp, "Error creating EP Iot", err)
+			return resp, err
+		}
+
+		resp.EndpointID = IotInfo.InfraIotDevID
+		resp.Attr = &cniapi.Attr{IPAddress: newEP.IPAddress, PortName: newEP.PortName,
+			Gateway: newEP.Gateway, IPv6Address: newEP.IPv6Address, IPv6Gateway: newEP.IPv6Gateway}
 
 		return resp, nil
 	}
 
-	// from r.Body, need tenant, networtk, epg(endpoit group), EndpointID, Name
-	epReq := epSpec{}
-	epReq.EndpointID = IotInfo.InfraIotDevID
-	epReq.Name = IotInfo.Name
-	epReq.Group = IotInfo.Group
-	epReq.Tenant = IotInfo.Tenant
-	epReq.Network = IotInfo.Network
-
-	NewEP, err := createEP(&epReq)
-	if err != nil {
-		log.Errorf("Error creating ep iot. Err: %v", err)
-		//setErrorResp(&resp, "Error creating EP Iot", err)
-		return resp, err
-	}
-
 	resp.EndpointID = IotInfo.InfraIotDevID
-
-	resp.Attr = &iotapi.Attr{IPAddress: NewEP.IPAddress, PortName: NewEP.PortName,
-		MacAddess: NewEP.MacAddress, IPv6Address: NewEP.IPv6Address}
+	resp.Attr = &cniapi.Attr{IPAddress: ep.IPAddress, PortName: ep.PortName,
+		Gateway: ep.Gateway, IPv6Address: ep.IPv6Address, IPv6Gateway: ep.IPv6Gateway}
 
 	return resp, nil
 }

@@ -29,6 +29,12 @@ const EPAddURL = "/ContivCNI.AddPod"
 // EPDelURL is the rest point for deleting an endpoint
 const EPDelURL = "/ContivCNI.DelPod"
 
+// EPAddURL is the rest point for adding an endpoint type device IoT
+const EPIoTAddURL = "/ContivIOT.AddIotDev"
+
+// EPDelURL is the rest point for deleting an endpoint
+//const EPDelURL = "/ContivCNI.DelPod"
+
 // CNIPodAttr holds attributes of the pod to be attached or detached
 type CNIPodAttr struct {
 	Name             string `json:"K8S_POD_NAME,omitempty"`
@@ -36,6 +42,15 @@ type CNIPodAttr struct {
 	InfraContainerID string `json:"K8S_POD_INFRA_CONTAINER_ID,omitempty"`
 	NwNameSpace      string `json:"CNI_NETNS,omitempty"`
 	IntfName         string `json:"CNI_IFNAME,omitempty"`
+}
+
+// IOTDevAttr holds attributes of the pod to be attached or detached
+type IOTDevAttr struct {
+	Name          string `json:"IOT_DEV_NAME,omitempty"`
+	Tenant        string `json:"IOT_DEV_TENANT,omitempty"`
+	InfraIotDevID string `json:"IOT_DEV_INFRA_ID,omitempty"`
+	Network       string `json:"IOT_DEV_NETWORK,omitempty"`
+	Group         string `json:"IOT_DEV_GROUP,omitempty"`
 }
 
 // RspAddPod contains the response to the AddPod

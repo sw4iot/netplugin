@@ -392,3 +392,8 @@ tar:
 # GITHUB_USER and GITHUB_TOKEN are needed be set (used by github-release)
 release: tar
 	TAR_FILENAME=$(TAR_FILENAME) TAR_FILE=$(TAR_FILE) scripts/release.sh
+
+release-image: compile-with-docker binaries-from-container archive
+	$(TAR) xvf $(TAR_FILE) -C ./netplugin-image/bin
+	docker build ./netplugin-image/ -t netplugin -t newton001/netplugin:test
+	docker push newton001/netplugin:test
