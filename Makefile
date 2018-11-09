@@ -393,6 +393,7 @@ tar:
 release: tar
 	TAR_FILENAME=$(TAR_FILENAME) TAR_FILE=$(TAR_FILE) scripts/release.sh
 
+# Form to create a image docker by n3wt0nSAN
 release-image: compile-with-docker binaries-from-container archive
 	$(TAR) xvf $(TAR_FILE) -C ./netplugin-image/bin
 	docker build ./netplugin-image/ -t netplugin -t newton001/netplugin:test
