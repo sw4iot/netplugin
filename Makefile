@@ -396,5 +396,5 @@ release: tar
 # Form to create a image docker by n3wt0nSAN
 release-image: compile-with-docker binaries-from-container archive
 	$(TAR) xvf $(TAR_FILE) -C ./netplugin-image/bin
-	docker build ./netplugin-image/ -t netplugin -t newton001/netplugin:test
-	docker push newton001/netplugin:test
+	docker build ./netplugin-image/ -t netplugin -t sw4iot/netplugin:1.3.0
+	docker push sw4iot/netplugin:1.3.0
