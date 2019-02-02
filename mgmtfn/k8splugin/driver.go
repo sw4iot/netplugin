@@ -337,3 +337,38 @@ func addIotDev(w http.ResponseWriter, r *http.Request, vars map[string]string) (
 
 	return resp, nil
 }
+
+// deletePod is the handler for pod deletes
+func deleteIotDev(w http.ResponseWriter, r *http.Request,
+	vars map[string]string) (interface{}, error) {
+
+	resp := cniapi.RspAddPod{}
+
+	logEvent("del iot device")
+
+	content, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Errorf("Failed to read request: %v", err)
+		return resp, err
+	}
+
+	IotInfo := cniapi.IOTDevAttr{}
+	if err := json.Unmarshal(content, &IotInfo); err != nil {
+		return resp, err
+	}
+
+	epReq := epSpec{}
+	epReq.EndpointID = IotInfo.InfraIotDevID
+	epReq.Name = IotInfo.Name
+	epReq.Group = IotInfo.Group
+	epReq.Tenant = IotInfo.Tenant
+	epReq.Network = IotInfo.Network
+
+	netPlugin.DeleteHostAccPort(epReq.EndpointID)
+	if err = epCleanUp(epReq); err != nil {
+		log.Errorf("failed to delete pod, error: %s", err)
+	}
+	resp.Result = 0
+	resp.EndpointID = IotInfo.InfraIotDevID
+	return resp, nil
+}

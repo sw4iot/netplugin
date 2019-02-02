@@ -33,7 +33,7 @@ const EPDelURL = "/ContivCNI.DelPod"
 const EPIoTAddURL = "/ContivIOT.AddIotDev"
 
 // EPDelURL is the rest point for deleting an endpoint
-//const EPDelURL = "/ContivCNI.DelPod"
+const EPIoTDelURL = "/ContivIOT.DelIotDev"
 
 // CNIPodAttr holds attributes of the pod to be attached or detached
 type CNIPodAttr struct {

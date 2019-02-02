@@ -135,6 +135,7 @@ func InitCNIServer(netplugin *plugin.NetPlugin) error {
 	t.HandleFunc(cniapi.EPAddURL, utils.MakeHTTPHandler(addPod))
 	t.HandleFunc(cniapi.EPDelURL, utils.MakeHTTPHandler(deletePod))
 	t.HandleFunc(cniapi.EPIoTAddURL, utils.MakeHTTPHandler(addIotDev))
+	t.HandleFunc(cniapi.EPIoTDelURL, utils.MakeHTTPHandler(deleteIotDev))
 	t.HandleFunc("/ContivCNI.{*}", utils.UnknownAction)
 	// register handlers for devices iot on contiv infra
 	t.HandleFunc("/ContivIOT.{*}", utils.UnknownAction)

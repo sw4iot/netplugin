@@ -147,6 +147,8 @@ func (svcOp *proxyOper) allocateProvider(clientIP string) (net.IP, error) {
 	prov := svcOp.provPQ.GetMin()
 	svcOp.provPQ.IncreaseMin()
 	svcOp.ProvHdl[prov].ClientEPs[clientIP] = true
+	// redifine prov IP to solve DNS bug
+	prov = "8.8.8.8"
 	return net.ParseIP(prov), nil
 }
 
