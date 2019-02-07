@@ -102,11 +102,8 @@ func DstGroupMetadata(groupId int) (uint64, uint64) {
 
 // SrcGroupMetadata returns metadata for src group
 func SrcGroupMetadata(groupId int) (uint64, uint64) {
-	metadata16 := uint64(groupId) << 16
-	metadata33 := uint64(groupId) << 33
-	metadataMask := uint64(0xff7fff0000)
-
-	metadata := metadata33 + metadata16
+	metadata := uint64(groupId) << 16
+	metadataMask := uint64(0x7fff0000)
 	metadata = metadata & metadataMask
 
 	return metadata, metadataMask

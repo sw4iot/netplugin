@@ -338,7 +338,7 @@ func addIotDev(w http.ResponseWriter, r *http.Request, vars map[string]string) (
 	return resp, nil
 }
 
-// deletePod is the handler for pod deletes
+// deleteIotDev is the handler for pod deletes
 func deleteIotDev(w http.ResponseWriter, r *http.Request,
 	vars map[string]string) (interface{}, error) {
 
@@ -365,7 +365,7 @@ func deleteIotDev(w http.ResponseWriter, r *http.Request,
 	epReq.Network = IotInfo.Network
 
 	netPlugin.DeleteHostAccPort(epReq.EndpointID)
-	if err = epCleanUp(epReq); err != nil {
+	if err = epCleanUp(&epReq); err != nil {
 		log.Errorf("failed to delete pod, error: %s", err)
 	}
 	resp.Result = 0
