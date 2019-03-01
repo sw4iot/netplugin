@@ -65,6 +65,7 @@ type RspAddPod struct {
 type Attr struct {
 	IPAddress   string `json:"ipaddress,omitempty"`
 	PortName    string `json:"portname,omitempty"`
+	MacAddress  string `json:"macaddress,omitempty"`
 	Gateway     string `json:"gateway,omitempty"`
 	IPv6Address string `json:"ipv6address,omitempty"`
 	IPv6Gateway string `json:"ipv6gateway,omitempty"`

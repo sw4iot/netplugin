@@ -98,6 +98,7 @@ func getEP(tenant, network, epID string) (*epAttr, error) {
 	epResp := epAttr{}
 	epResp.PortName = ep.PortName
 	epResp.IPAddress = ep.IPAddress + "/" + strconv.Itoa(int(nw.SubnetLen))
+	epResp.MacAddress = ep.MacAddress
 	epResp.Gateway = nw.Gateway
 
 	if ep.IPv6Address != "" {
@@ -167,6 +168,7 @@ func createEP(req *epSpec) (*epAttr, error) {
 	epResponse := epAttr{}
 	epResponse.PortName = ep.PortName
 	epResponse.IPAddress = ep.IPAddress + "/" + strconv.Itoa(int(nw.SubnetLen))
+	epResponse.MacAddress = ep.MacAddress
 	epResponse.Gateway = nw.Gateway
 
 	if ep.IPv6Address != "" {
@@ -325,15 +327,18 @@ func addIotDev(w http.ResponseWriter, r *http.Request, vars map[string]string) (
 		}
 
 		resp.EndpointID = IotInfo.InfraIotDevID
-		resp.Attr = &cniapi.Attr{IPAddress: newEP.IPAddress, PortName: newEP.PortName,
-			Gateway: newEP.Gateway, IPv6Address: newEP.IPv6Address, IPv6Gateway: newEP.IPv6Gateway}
+		resp.Attr = &cniapi.Attr{IPAddress: newEP.IPAddress,
+			PortName: newEP.PortName, MacAddress: newEP.MacAddress,
+			Gateway: newEP.Gateway, IPv6Address: newEP.IPv6Address,
+			IPv6Gateway: newEP.IPv6Gateway}
 
 		return resp, nil
 	}
 
 	resp.EndpointID = IotInfo.InfraIotDevID
 	resp.Attr = &cniapi.Attr{IPAddress: ep.IPAddress, PortName: ep.PortName,
-		Gateway: ep.Gateway, IPv6Address: ep.IPv6Address, IPv6Gateway: ep.IPv6Gateway}
+		MacAddress: ep.MacAddress, Gateway: ep.Gateway,
+		IPv6Address: ep.IPv6Address, IPv6Gateway: ep.IPv6Gateway}
 
 	return resp, nil
 }
