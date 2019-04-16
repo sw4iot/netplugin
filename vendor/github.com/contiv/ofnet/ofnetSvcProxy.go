@@ -147,8 +147,6 @@ func (svcOp *proxyOper) allocateProvider(clientIP string) (net.IP, error) {
 	prov := svcOp.provPQ.GetMin()
 	svcOp.provPQ.IncreaseMin()
 	svcOp.ProvHdl[prov].ClientEPs[clientIP] = true
-	// redifine prov IP to solve DNS bug
-	prov = "8.8.8.8"
 	return net.ParseIP(prov), nil
 }
 
@@ -669,7 +667,7 @@ func (proxy *ServiceProxy) HandlePkt(pkt *ofctrl.PacketIn) {
 	}
 
 	inPort := getInPort(pkt)
-	provMac := "00:00:11:11:11:11" //proxy.getRewriteMAC(inPort, provIP)
+	provMac := proxy.getRewriteMAC(inPort, provIP)
 	// use copies of fields from the pkt
 	ipSrc := net.ParseIP(ip.NWSrc.String())
 	ipDst := net.ParseIP(ip.NWDst.String())

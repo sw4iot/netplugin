@@ -17,6 +17,7 @@ HOST_GOBIN := `if [ -n "$$(go env GOBIN)" ]; then go env GOBIN; else dirname $$(
 HOST_GOROOT := `go env GOROOT`
 NAME := netplugin
 VERSION := $(shell scripts/getGitVersion.sh)
+IMAGE_VERSION := 1.3.0
 TAR := $(shell command -v gtar || command -v tar || echo "Could not find tar")
 TAR_EXT := tar.bz2
 export NETPLUGIN_CONTAINER_TAG := $(shell ./scripts/getGitVersion.sh)
@@ -393,8 +394,8 @@ tar:
 release: tar
 	TAR_FILENAME=$(TAR_FILENAME) TAR_FILE=$(TAR_FILE) scripts/release.sh
 
-# Form to create a image docker by n3wt0nSAN
+# Form to create a image docker by n3wt0n_s4n
 release-image: compile-with-docker binaries-from-container archive
 	$(TAR) xvf $(TAR_FILE) -C ./netplugin-image/bin
-	docker build ./netplugin-image/ -t netplugin -t sw4iot/netplugin:test
-	docker push sw4iot/netplugin:test
+	docker build ./netplugin-image/ -t netplugin -t sw4iot/netplugin:$(IMAGE_VERSION)
+	docker push sw4iot/netplugin:$(IMAGE_VERSION)
