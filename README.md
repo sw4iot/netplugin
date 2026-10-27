@@ -1,6 +1,16 @@
+# Netplugin (Edge & SDN Edition)
+
+A multi-host **Kubernetes CNI plugin written in Go**, adapted to eliminate edge-to-container networking bottlenecks in distributed and fog-computing environments. It bridges containerized workloads with Software-Defined Networking (SDN) and physical infrastructure while enforcing strict multi-tenant isolation and traffic policies.
+
+### Key Capabilities
+* **Edge-to-Container Routing:** Low-latency packet forwarding across clustered multi-host and IoT/fog nodes.
+* **Multi-Tenant Isolation:** Disjoint virtual networks for containers running on shared physical hosts.
+* **SDN & Physical Hand-Offs:** Native interoperability with OpenFlow/OpenvSwitch control planes and bare-metal L2/L3 networks.
+* **Granular Traffic Control:** Per-container ACL security rules and QoS bandwidth policies.
+
+---
 [![Build Status](https://contiv-ci.ngrok.io/job/Netplugin%20Push%20Build%20Master/badge/icon)](https://contiv-ci.ngrok.io/job/Netplugin%20Push%20Build%20Master/) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/contiv/netplugin)](https://goreportcard.com/report/github.com/contiv/netplugin)
-
 ## Netplugin
 
 Generic network plugin is designed to handle networking use
